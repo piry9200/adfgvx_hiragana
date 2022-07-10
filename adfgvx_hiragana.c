@@ -1,7 +1,11 @@
 // 'A'はA\0を組み合わせたもの. 'A'はA. c言語は'と'を区別する.
+// scanfは空白を取得できない
+
 #include <stdio.h>
 #include <wchar.h>
 #include <locale.h> 
+
+int isEnd(wchar_t string[]); //指定したワイド文字列配列の中で一番後ろにある文字のインデックス番号を返す.一文字も入ってない場合-1を返す.
 
 int main(int argc, const char * argv[]){
     setlocale(LC_CTYPE, ""); //ワイド文字列を出力するために必要
@@ -20,13 +24,34 @@ int main(int argc, const char * argv[]){
 
     wchar_t scan[501] = {L'\0'};
     int flag_1 = 0;
+    int indexToInput = 0;
 
-    scanf("%ls",scan);
+    printf("使用可能文字: ひらがな, 半角数字\n");
+    printf("改行 : Enterキー\n");
+    printf("空白 : _ または ＿\n");
+    printf("文を入力してください。(q(半角or全角)で終了)\n");
+
+    while(1){
+        indexToInput = isEnd(scan); //scanfする前の最後尾にあるインデックス番号を代入
+        scanf("%ls",&scan[indexToInput + 1]);
+        indexToInput = isEnd(scan); //scanf後の最後尾にあるインデックス番号を代入
+        if(scan[indexToInput] == 'q'){
+            break;
+        }
+        scan[indexToInput + 1] = '\n'; //一度Enterキーが押されたら改行する.
+    }
+    
     for(int i = 0; i < sizeof(scan); i++){ //scanの文字をひとつずつチェック
 
-        if(scan[i] == '\0'){ //scanから取り出した値が'\0'だったらscanの文字列を参照するのを中断
-        printf("\n");
-        break;
+        if(scan[i] == '\0'){ //scanから取り出した値が'\0'だったら全ての文字を見終えたのでプログラムを終了する
+            printf("\n");
+            return 0;
+        } else if(scan[i] == '_' || scan[i] == L'＿'){
+            printf(" ");
+            continue;
+        } else if(scan[i] == '\n'){
+            printf("\n");
+            continue;
         }
 
         for(int r = 0; r < 9; r++){  //scanから取り出した文字が表の何行何列にあるかを確かめる r=行 c=列
@@ -46,3 +71,12 @@ int main(int argc, const char * argv[]){
         
     return 0;
 }
+
+
+int isEnd(wchar_t string[]){
+    int count;
+    for(count = 0; string[count] != '\0'; count++){
+
+    }
+    return count - 1; //配列の最後尾にある文字のインデックス番号を返す.
+    }
