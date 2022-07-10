@@ -1,5 +1,7 @@
 // 'A'はA\0を組み合わせたもの. 'A'はA. c言語は'と'を区別する.
 // scanfは空白を取得できない
+//ファイルに出力
+//復号するときはキーワードを求めるようにする
 
 #include <stdio.h>
 #include <wchar.h>
@@ -26,15 +28,17 @@ int main(int argc, const char * argv[]){
     int flag_1 = 0;
     int indexToInput = 0;
 
+    printf("---------------------------------------------------------\n");
     printf("使用可能文字: ひらがな, 半角数字\n");
     printf("改行 : Enterキー\n");
     printf("空白 : _ または ＿\n");
-    printf("文を入力してください。(q(半角or全角)で終了)\n");
+    printf("文を入力してください。(qで終了)\n");
+    printf("---------------------------------------------------------\n");
 
     while(1){
-        indexToInput = isEnd(scan); //scanfする前の最後尾にあるインデックス番号を代入
+        indexToInput = isEnd(scan); //scanfする前の最後尾にある文字のインデックス番号を代入
         scanf("%ls",&scan[indexToInput + 1]);
-        indexToInput = isEnd(scan); //scanf後の最後尾にあるインデックス番号を代入
+        indexToInput = isEnd(scan); //scanf後の最後尾にある文字のインデックス番号を代入
         if(scan[indexToInput] == 'q'){
             break;
         }
