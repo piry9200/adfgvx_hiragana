@@ -7,11 +7,11 @@
 #include <wchar.h>
 #include <locale.h> 
 
-int isEnd(wchar_t string[]); //指定したワイド文字列配列の中で一番後ろにある文字のインデックス番号を返す.一文字も入ってない場合-1を返す.
+int itsEndIndexNumIs(wchar_t string[]); //指定したワイド文字列配列の中で一番後ろにある文字のインデックス番号を返す.一文字も入ってない場合-1を返す.
+int itsIndexNumIs(wchar_t word); //指定した平仮名がひらがな表の[0][0]の要素を「1」、[8][8]の要素を「81」として、その規則に従った値を返す。見つからなかったら-1を返す。
 
-int main(int argc, const char * argv[]){
-    setlocale(LC_CTYPE, ""); //ワイド文字列を出力するために必要
-    wchar_t table[9][9] ={
+
+wchar_t table[9][9] ={
             {L'あ',L'い',L'う',L'え',L'お',L'か',L'き',L'く',L'け'},
             {L'こ',L'さ',L'し',L'す',L'せ',L'そ',L'た',L'ち',L'つ'},
             {L'て',L'と',L'な',L'に',L'ぬ',L'ね',L'の',L'は',L'ひ'},
@@ -22,18 +22,48 @@ int main(int argc, const char * argv[]){
             {L'ぶ',L'べ',L'ぼ',L'ぱ',L'ぴ',L'ぷ',L'ぺ',L'ぽ',L'っ'},
             {L'ゃ',L'ゅ',L'ょ',L'！',L'？',L'「',L'」',L'（',L'）'}
         };
+
+
+int main(int argc, const char * argv[]){
+    setlocale(LC_CTYPE, ""); //ワイド文字列を出力するために必要
+    //--------換字をするための準備----------
     wchar_t transformKey[9] = {L'き',L'さ',L'ま',L'み',L'て',L'い',L'る',L'な',L'!'};
-    wchar_t arrangeKey[11] = {L'\0'}; //キーワードは10文字以内
-    wchar_t text[501] = {L'\0'};
+    wchar_t arrangeKey[11] = {L"こんばんは"}; //パスワードは10文字以内
+    wchar_t text[501] = {L'\0'}; //暗号化する文章を入れるやつ
     int findFlag = 0;
-    int indexToInput = 0;
+    int indexToInput = 0; //scanfを無限ループして,改行処理をするために使う
+    //------------------------------------
 
     printf("-----------------パスワードを設定してください-----------------\n");
     printf("＊10文字以内\n");
     printf("＊ひらがなのみ\n");
     printf("---------------------------------------------------------\n");
     printf("パスーワード : ");
-    scanf("%ls",arrangeKey);
+    // scanf("%ls",arrangeKey);
+
+    //------入力されたパスワードをあいうえお順にソートする------
+    wchar_t sort_arrange[11] = {'\0'};
+    wchar_t tmp = '\0';
+    int preNum = 0; //ひらがな表の位置を入れる
+    int postNum = 0; //ひらがな表の位置を入れる
+    for(int i=0; i < itsEndIndexNumIs(arrangeKey) + 2; i++){ //バブルソート
+        for(int j=0; j < itsEndIndexNumIs(arrangeKey) ; j++){ //　隣同士の比較を行う
+            preNum = itsIndexNumis(arrangeKey[j]);
+            postNum = itsIndexNumIs(arrangeKey[j+1]); 
+            if(preNum > postNum){
+                tmp = arrangeKey[i];
+                arrangeKey[j] = arrangeKey[j+1];
+                arrangeKey[j+1] = tmp;
+            }
+        }
+    }
+    //--------------------------------------------------
+
+    //---------転置表をつくるための準備--------- 
+    int column = (itsEndIndexNumIs(arrangeKey) + 1 ) * 2; //入力されたパスワードの長さの２倍をnumOfPwdへ代入
+    int row = 1000 / (column + 1); //codedTextの 行*列 を1000以上にしたい。列数はパスワードの長さで固定だから、行数は1000をnumOfPwdに１を足したもので割ったものにすればよい
+    wchar_t codedText[row][column]; // 
+    //------------------------------------
 
     printf("-----------------文を入力してください。(qで終了)-----------------\n");
     printf("使用可能文字: ひらがな\n");
@@ -42,11 +72,11 @@ int main(int argc, const char * argv[]){
     printf("空白 : _ または ＿\n");
     printf("----------------------↓入力してください------------------------\n");
 
-    while(1){
-        indexToInput = isEnd(text); //textfする前の最後尾にある文字のインデックス番号を代入
+    while(1){ //scanfを無限ループ
+        indexToInput = itsEndIndexNumIs(text); //textfする前の最後尾にある文字のインデックス番号を代入
         scanf("%ls",&text[indexToInput + 1]);
-        indexToInput = isEnd(text); //textf後の最後尾にある文字のインデックス番号を代入
-        if(text[indexToInput] == 'q'){
+        indexToInput = itsEndIndexNumIs(text); //textf後の最後尾にある文字のインデックス番号を代入
+        if(text[indexToInput] == 'q'){ //qが入力されたらループ終了
             break;
         }
         text[indexToInput + 1] = '\n'; //一度Enterキーが押されたら改行する.
@@ -84,10 +114,25 @@ int main(int argc, const char * argv[]){
 }
 
 
-int isEnd(wchar_t string[]){
+int itsEndIndexNumIs(wchar_t string[]){
     int count;
     for(count = 0; string[count] != '\0'; count++){
 
     }
     return count - 1; //配列の最後尾にある文字のインデックス番号を返す.
-    }
+}
+
+int itsIndexNumis(wchar_t word){
+    int count = 0;
+
+     for(int r = 0; r < 9; r++){  //ひらがな表探索
+            for(int c = 0; c < 9; c++){ //ひらがな表探索
+                count++;
+                if(word == table[r][c]){
+                    return count;
+                }
+            }
+        }
+    
+    return -1;
+}
