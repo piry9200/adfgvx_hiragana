@@ -24,7 +24,6 @@ wchar_t table[9][9] ={
             {L'ゃ',L'ゅ',L'ょ',L'！',L'？',L'「',L'」',L'（',L'）'}
         };
 
-
 int main(int argc, const char * argv[]){
     setlocale(LC_CTYPE, ""); //ワイド文字列を出力するために必要
     //--------換字をするための準備----------
@@ -66,12 +65,13 @@ int main(int argc, const char * argv[]){
     printf("使用可能文字: ひらがな\n");
     printf("使用可能文字: ！, ？, 」,「, ）,（　 ←すべて全角\n");
     printf("注:改行や空白を空けるなどは未実装です。\n");
+    printf("注:全角空白を入れるとバグります。直したい。\n");
     printf("----------------------↓入力してください(qで終了)------------------------\n");
 
     while(1){ //scanfを無限ループ
-        indexToInput = itsEndIndexNumIs(text); //textfする前の最後尾にある文字のインデックス番号を代入
-        scanf("%ls",&text[indexToInput + 1]);
-        indexToInput = itsEndIndexNumIs(text); //textf後の最後尾にある文字のインデックス番号を代入
+        indexToInput = itsEndIndexNumIs(text); //scanfする前の最後尾にある文字のインデックス番号を代入
+        scanf("%ls", &text[indexToInput + 1]);
+        indexToInput = itsEndIndexNumIs(text); //scanf後の最後尾にある文字のインデックス番号を代入
         if(text[indexToInput] == 'q'){ //qが入力されたらループ終了
             break;
         }
