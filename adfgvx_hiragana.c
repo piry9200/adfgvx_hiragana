@@ -10,7 +10,8 @@
 
 int itsEndIndexNumIs(wchar_t string[]); //指定したワイド文字列配列の中で一番後ろにある文字のインデックス番号を返す.一文字も入ってない場合-1を返す.
 int itsIndexNumIs(wchar_t word); //指定した平仮名がひらがな表の[0][0]の要素を「1」、[8][8]の要素を「81」として、その規則に従った値を返す。見つからなかったら-1を返す。
-void copyArray(wchar_t assigned[], wchar_t exist[]);
+void copyArray(wchar_t assigned[], wchar_t exist[]); //要素数20のint型リストの全要素をを9で初期化
+void setArray(int array[]);
 
 wchar_t table[9][9] ={
             {L'あ',L'い',L'う',L'え',L'お',L'か',L'き',L'く',L'け'},
@@ -64,7 +65,6 @@ int main(int argc, const char * argv[]){
     printf("-----------------文を入力してください。(qで終了)-----------------\n");
     printf("使用可能文字: ひらがな\n");
     printf("使用可能文字: ！, ？, 」,「, ）,（　 ←すべて全角\n");
-    printf("注:改行や空白を空けるなどは未実装です。\n");
     printf("注:全角空白を入れるとバグります。直したい。\n");
     printf("----------------------↓入力してください(qで終了)------------------------\n");
 
@@ -108,7 +108,7 @@ int main(int argc, const char * argv[]){
 
                         findFlag = 1; //表から文字が見つかったらそれを出力してflagを立てる
                         count++;//パスワードの次の文字へ
-                        if(arrangeKey[count] == '\0'){
+                        if(arrangeKey[count] == '\0'){ //パスワードで作った転置表の行をリセット
                             count = 0;
                             rowIncrement++;
                         }
@@ -131,6 +131,49 @@ int main(int argc, const char * argv[]){
         }
     }
 
+    printf("\n");
+
+    char ans = {'\0'};
+    printf("暗号文をファイルに保存しますか？(y or n) : ");
+    scanf("%s", &ans);
+    if(ans == 'y'){
+        FILE *fp;
+        char fName[21] = {'\0'};
+        int codeKey[20] = { 0 }; //ファイルにパスワードを保存するための変数。パスワードのひらがなを順に行列番号で表現する.　あ→00 //9は使われないので9で初期化しておく
+        setArray(codeKey);
+        int flag_2 = 0;
+        for(int i = 0; arrangeKey[i] != '\0'; i++){ //パスワードのひらがなを順に行列番号で表現する.　あ→00
+            for(int r = 0; r < 9; r++){  //textから取り出した文字が表の何行何列にあるかを確かめる r=行 c=列
+                for(int c = 0; c < 9; c++){
+                    if(arrangeKey[i] == table[r][c]){ //textから取り出した文字が見つかったら
+                        codeKey[2*i] = r; //行番号
+                        codeKey[2*i+1] = c; //列番号
+                        flag_2 = 1;
+                        break;
+                    }
+                }
+                if(flag_2 == 1){
+                    flag_2 = 0;
+                    break;
+                }
+            }
+        }
+        
+        printf("保存するファイルの名前を入力してください(20文字以内, 半角英数字のみ, 末尾に「.txt」をつけてください) : ");
+        scanf("%s", fName);
+        fp = fopen(fName, "w");
+        for(int i = 0; codeKey[i] != 9; i++){
+            fprintf(fp, "%d", codeKey[i]);
+        }
+        fprintf(fp, "\n");
+        for(int r = 0; codedText[r][0] != 'q'; r++){ // ファイルに暗号文を保存する
+            for(int c = 0; arrangeKey[c] != '\0'; c++){
+                fwprintf(fp, L"%lc%lc", codedText[r][2*c], codedText[r][2*c+1]);
+            }
+        }
+        fclose(fp);
+    }
+    
     printf("\n");    
     return 0;
 }
@@ -162,5 +205,11 @@ int itsIndexNumIs(wchar_t word){
 void copyArray(wchar_t assigned[], wchar_t exist[]){
     for(int i = 0; exist[i] != '\0'; i++){
         assigned[i] = exist[i];
+    }
+}
+
+void setArray(int array[]){
+    for(int i = 0; i < 20; i++){
+        array[i] = 9;
     }
 }
