@@ -32,22 +32,24 @@ wchar_t table[9][9] ={
 int main(int argc, const char * argv[]){
     setlocale(LC_ALL, "ja_JP.UTF-8"); //文字コードを設定
     //--------換字をするための準備----------
-    wchar_t transformKey[9] = {L'き',L'さ',L'ま',L'み',L'て',L'い',L'る',L'な',L'!'};
-    wchar_t pwdToArrange[11] = {L"えいうおあ"}; //パスワードは10文字以内
-    wchar_t text[501] = {L"かれえらいすq"}; //暗号化する文章を入れるやつ
+    wchar_t transformKey[10] = {L'き',L'さ',L'ま',L'み',L'て',L'い',L'る',L'な',L'!','\0'};
+    wchar_t pwdToArrange[11] = {L'\0'}; //パスワードは10文字以内
+    wchar_t text[501] = {L'\0'}; //暗号化する文章を入れるやつ
     wchar_t codedText[50][20] = { {L'\0'} }; //暗号化した文章を入れるやつ
-    char fName[21] = {"test2.txt"};
+    wchar_t decodedText[100][10] = { {L'\0'} }; //復号化した文章を入れるやつ
+    wchar_t sorted_pwdToArrange[11] = {L'\0'}; //パスワードをあいうえお順にしたものを入れるやつ
+    char fName[21] = {'\0'};
     int findFlag = 0;
     int count = 0; //設定したパスワードの1文字目から、あいうえお順にしたときに何番目にあるかを調べるときに使う
     int rowIncrement = 0;
     //------------------------------------
-    int mode = 0;
+    int mode = 9;
     printf("-----------------モードを選んでください-----------------\n");
     printf("0 : 暗号化\n");
     printf("1 : 復号化\n");
     printf("---------------------------------------------------------\n");
     printf("モード? : ");
-    ////scanf("%d", &mode);
+    scanf("%d", &mode);
 
     switch (mode){
         case 0:
@@ -56,10 +58,9 @@ int main(int argc, const char * argv[]){
             printf("＊ひらがなのみ\n");
             printf("---------------------------------------------------------\n");
             printf("パスワード? : ");
-            //scanf("%ls",pwdToArrange);
+            scanf("%ls",pwdToArrange);
 
             //------入力されたパスワードをあいうえお順にソートする------
-            wchar_t sorted_pwdToArrange[11] = {L'\0'};
             copyArray(sorted_pwdToArrange, pwdToArrange); //sorted_pwdToArrangeへpwdToArrangeの要素をコピー
             sortHiragana(sorted_pwdToArrange);
             //--------------------------------------------------
@@ -73,7 +74,7 @@ int main(int argc, const char * argv[]){
             int indexToInput = 0; ////scanfを無限ループして,改行処理をするために使う
             while(1){ ////scanfを無限ループ
                 indexToInput = itsEndIndexNumIs(text); ////scanfする前の最後尾にある文字のインデックス番号を代入
-                //scanf("%ls", &text[indexToInput + 1]);
+                scanf("%ls", &text[indexToInput + 1]);
                 indexToInput = itsEndIndexNumIs(text); ////scanf後の最後尾にある文字のインデックス番号を代入
                 if(text[indexToInput] == 'q'){ //qが入力されたらループ終了
                     break;
@@ -108,7 +109,7 @@ int main(int argc, const char * argv[]){
 
                                 findFlag = 1; //表から文字が見つかったらそれを出力してflagを立てる
                                 count++;//パスワードの次の文字へ
-                                if(pwdToArrange[count] == '\0'){ //パスワードで作った転置表の行をリセット
+                                if(pwdToArrange[count] == '\0'){ //パスワードの末尾になったら、次の行へ
                                     count = 0;
                                     rowIncrement++;
                                 }
@@ -133,9 +134,9 @@ int main(int argc, const char * argv[]){
 
             printf("\n");
 
-            char ans = 'y';
+            char ans = '\0';
             printf("暗号文をファイルに保存しますか？(y or n) : ");
-            //scanf("%s", &ans);
+            scanf("%s", &ans);
             if(ans == 'y'){
                 FILE *fp;
                 int codedKey[20] = { 0 }; //暗号化したパスワードを保存するための配列。パスワードはひらがなを行列番号で表現することで暗号化する.　あ→00 
@@ -159,7 +160,7 @@ int main(int argc, const char * argv[]){
                 }
                 
                 printf("保存するファイルの名前を入力してください(20文字以内, 半角英数字のみ, 末尾に「.txt」をつけてください) : ");
-                //scanf("%s", fName);
+                scanf("%s", fName);
                 fp = fopen(fName, "w, ccs = UTF-8");
                 for(int i = 0; codedKey[i] != 9; i++){
                     fprintf(fp, "%d", codedKey[i]);
@@ -180,7 +181,7 @@ int main(int argc, const char * argv[]){
         case 1:
             printf("-----------------複合化するファイル名を入力してください-----------------\n");
             printf("ファイル名? : ");
-            //scanf("%s",fName);
+            scanf("%s",fName);
 
             FILE *fp;
             fp = fopen(fName, "r, ccs = UTF-8");
@@ -194,7 +195,7 @@ int main(int argc, const char * argv[]){
                 pwdToArrange[i] = table[row][column]; //pwdToArrangeへ設定したパスワードを復号化して代入
             }
             
-            wchar_t checkPwd[11] = {L"えいうおあ"}; //ユーザが入力したpwdを入れる。それがpwdToArrangeと一致するか確認
+            wchar_t checkPwd[11] = {L'\0'}; //ユーザが入力したpwdを入れる。それがpwdToArrangeと一致するか確認
             printf("-----------------パスワードを入力してください-----------------\n");
             printf("＊10文字以内\n");
             printf("＊ひらがなのみ\n");
@@ -203,13 +204,13 @@ int main(int argc, const char * argv[]){
         // -------------checkPwdとpwdToArrangeが一致するかを確認する部分---------------------- 
             while(1){
                 printf("パスワード? : ");
-                //scanf("%ls",checkPwd);
+                scanf("%ls",checkPwd);
                 if(checkPwd[0] == 'q'){
                     return 0;
                 }
                 for(int i = 0; i < 11; i++){ // checkPwdとpwdToArrangeが一致するかを確認
                     if(checkPwd[i] != pwdToArrange[i]){
-                        printf("パスワードが違います。再入力してください。辞める場合はqを入力。");
+                        printf("パスワードが違います。再入力してください。辞める場合はqを入力。\n");
                         for(int i = 0; checkPwd[i] != '\0'; i++){ // checkPwdを'\0'で初期化
                             checkPwd[i] = '\0';
                         }
@@ -231,18 +232,61 @@ int main(int argc, const char * argv[]){
             fclose(fp);
             wchar_t getCode[1000] = {'\0'};
             int index = 0;
-            for(int i = 0; tempArray[i] != '\n' ; i++){ //値がとびとびで代入されるため、tempArrayの要素を'\n'が出てくるまで確認。保存の際,最後に改行するようにしてあるので、それが目印となる.
-                if(tempArray[i] == '\0') continue;
+            for(int i = 0; tempArray[i] != '\n' ; i++){ //値がとびとびで代入されるため、tempArrayの要素を'\n'が出てくるまで'\0'を飛ばして、getCodeへ代入。
+                if(tempArray[i] == '\0') continue;                                                //↑ 暗号を保存する際,最後に改行するようにしてあるので、それが暗号文の末尾の目印となる.
                 getCode[index] = tempArray[i];
                 index++;
             }
         // --------------------------------------------------------------------------------- 
-            for(int i = 0; getCode[i] != '\0'; i++){
+
+        copyArray(sorted_pwdToArrange, pwdToArrange); //sorted_pwdToArrangeへpwdToArrangeをコピー
+        sortHiragana(sorted_pwdToArrange); //sorted_pwdToArrangeをあいうえお順にソート
+        //--------------------復号化-------------------------------
+        int r = 9; //暗号文を平文に戻す際、暗号文がひらがな表の何行目かを入れる　ex)さ　→ 1  9は使われないので9で初期化
+        int c = 9; //暗号文を平文に戻す際、暗号文がひらがな表の何列目かを入れる　ex)き　→ 0
+            for(int i = 0; getCode[2*i] != '\0'; i++){ //暗号文を２文字ずつ見ていく
+                //----------暗号文2文字をひらがな1文字へ復号する部分--------------------------
+                for(int j = 0; transformKey[j] != '\0'; j++){
+                    if(transformKey[j] == getCode[2*i]){ // getCode[2*i]がtansformKeyの何番目（この値がひらがな表の行または列を表す）にあるのかを判定
+                        r = j;
+                    }
+                    if(transformKey[j] == getCode[2*i + 1]){
+                        c = j;
+                    }
+                    if(r != 9 && c != 9){
+                        break;
+                    }
+                }//---------------------------------------------------------
+
+                //--------------復号化したひらがなをパスワードに従った順番に並べ替える部分-----------
+                for(int k = 0; pwdToArrange[k] != '\0'; k++){
+                    if(sorted_pwdToArrange[count] == pwdToArrange[k]){
+                        decodedText[rowIncrement][k] = table[r][c];
+                        count++;
+                        r = 9; //初期化し直す
+                        c = 9; //初期化し直す
+                        break;
+                    }
+                }
+
+                if(sorted_pwdToArrange[count] == '\0'){
+                    count = 0;
+                    rowIncrement++;
+                }
                 
+            } //--------------------復号化おわり----------------------------
+            decodedText[rowIncrement + 1][0] = 'q'; //復号文の終わりの目印用にqを代入しておく
+
+            for(int r = 0; decodedText[r][0] != 'q'; r++){
+                for(int c = 0; c < 10; c++){
+                    if(decodedText[r][c] != '\0'){
+                        printf("%lc",decodedText[r][c]);
+                    }
+                }
             }
+            printf("\n");
             break;
     }
-
     return 0;
 }
 
