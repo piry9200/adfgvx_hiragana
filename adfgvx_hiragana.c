@@ -1,20 +1,25 @@
-// 'A'はA\0を組み合わせたもの. 'A'はA. c言語は'と'を区別する.
-// textfは空白を取得できない
-// 戻り値がvoidの関数はreturn 0しない
 //ファイルに出力
 //復号するときはキーワードを求めるようにする
 //複合化するファイルが見つからなかったときの例外処理
-//fopenの引数の', css = UTF-8'部分大事
+//fopenの引数部分「, css = UTF-8」部分大事
+
+/*
+
+一次大戦中にドイツ軍で使用されていた『ADFGVX暗号』を参考にした暗号化プログラムです。ADFGVX暗号では平文を「A」「D」「F」「G」「V」「X」の６文字で暗号化しますが、
+このプログラムでは平文を「き」「さ」「ま」「み」「て」「い」「る」「な」「！」の９文字で暗号化します。
+使用可能な文字は平仮名と[!, ?, 「, 」, (, )]←の記号です。
+
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <locale.h> 
 #include <wchar.h>
 
-int itsEndIndexNumIs(wchar_t string[]); //指定したワイド文字列配列の中で一番後ろにある文字のインデックス番号を返す.一文字も入ってない場合-1を返す.
+int itsEndIndexNum(wchar_t string[]); //指定したワイド文字列配列の中で一番後ろにある文字のインデックス番号を返す.一文字も入ってない場合-1を返す.
 int NumberOnTable(wchar_t word); //指定した平仮名がひらがな表の[0][0]の要素を「1」、[8][8]の要素を「81」として、その規則に従った値を返す。見つからなかったら-1を返す。
 void copyArray(wchar_t assigned[], wchar_t exist[]); //要素数20のint型リストの全要素をを9で初期化
-void setArray(int array[]);
+void setArray(int array[]); //整数型の配列を初期化するための関数
 void sortHiragana(wchar_t sortedArray[]); //引数に指定した配列をひらがな順にソートする。
 
 wchar_t table[9][9] ={
@@ -73,9 +78,9 @@ int main(int argc, const char * argv[]){
 
             int indexToInput = 0; ////scanfを無限ループして,改行処理をするために使う
             while(1){ ////scanfを無限ループ
-                indexToInput = itsEndIndexNumIs(text); ////scanfする前の最後尾にある文字のインデックス番号を代入
+                indexToInput = itsEndIndexNum(text); ////scanfする前の最後尾にある文字のインデックス番号を代入
                 scanf("%ls", &text[indexToInput + 1]);
-                indexToInput = itsEndIndexNumIs(text); ////scanf後の最後尾にある文字のインデックス番号を代入
+                indexToInput = itsEndIndexNum(text); ////scanf後の最後尾にある文字のインデックス番号を代入
                 if(text[indexToInput] == 'q'){ //qが入力されたらループ終了
                     break;
                 }
@@ -179,7 +184,7 @@ int main(int argc, const char * argv[]){
             break;
         
         case 1:
-            printf("-----------------複合化するファイル名を入力してください-----------------\n");
+            printf("-----------------復号化するファイル名を入力してください-----------------\n");
             printf("ファイル名? : ");
             scanf("%s",fName);
 
@@ -291,7 +296,7 @@ int main(int argc, const char * argv[]){
 }
 
 
-int itsEndIndexNumIs(wchar_t string[]){
+int itsEndIndexNum(wchar_t string[]){
     int count;
     for(count = 0; string[count] != '\0'; count++){
 
@@ -330,8 +335,8 @@ void sortHiragana(wchar_t sortedArray[]){
     wchar_t tmp = '\0';
     int preNum = 0; //ひらがな表の位置を入れる
     int postNum = 0; //ひらがな表の位置を入れる
-    for(int i=0; i < itsEndIndexNumIs(sortedArray) + 2; i++){ //バブルソート
-        for(int j=0; j < itsEndIndexNumIs(sortedArray) ; j++){ //　隣同士の比較を行う
+    for(int i=0; i < itsEndIndexNum(sortedArray) + 2; i++){ //バブルソート
+        for(int j=0; j < itsEndIndexNum(sortedArray) ; j++){ //　隣同士の比較を行う
             preNum = NumberOnTable(sortedArray[j]);
             postNum = NumberOnTable(sortedArray[j+1]); 
             if(preNum > postNum){
